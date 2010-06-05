@@ -1,0 +1,14 @@
+.DS_Store
+
+*.tmproj
+tmtags
+
+*~
+\#*
+.\#*
+
+*.swp
+
+pkg
+
+.bundle

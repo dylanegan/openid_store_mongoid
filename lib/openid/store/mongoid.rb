@@ -48,11 +48,18 @@ module OpenID
 
       def cleanup_nonces
         now = Time.now.to_i
-        OpenIDStoreMongoid::Nonce.destroy_all(:conditions => { :timestamp.gt => (now + OpenID::Nonce.skew), :timestamp.lt => (now - OpenID::Nonce.skew) })
+        count = 0
+        # Some weird bug with .destroy_all(:conditions => {:timestamp.gt => (now + OpenID::Nonce.skew), :timestamp.lt => (now - OpenID::Nonce.skew)})
+        OpenIDStoreMongoid::Nonce.where(:timestamp.gt => (now + OpenID::Nonce.skew)).and(:timestamp.lt => (now - OpenID::Nonce.skew)).each do |nonce|
+          nonce.destroy
+          count += 1
+        end
+        count
       end
 
       def cleanup_associations
         count = 0
+        # Not sure how to do this in Mongo, maybe someone can show me?
         OpenIDStoreMongoid::Association.all(:conditions => { :issued.gt => 0 }).each do |association|
           if association.lifetime + association.issued > Time.now.to_i
             association.destroy
